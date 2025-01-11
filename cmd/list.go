@@ -14,20 +14,16 @@ var listCmd = &cobra.Command{
 	Long: util.Prettify(`
 	Lists issues satisfying the specified criteria.
 	`),
-	Run: func(cmd *cobra.Command, args []string) {
-		cobra.CheckErr(list())
-	},
+	Run: execList,
 }
 
-func list() error {
+func execList(cmd *cobra.Command, args []string) {
 	// util.Log("Using token: ", config.Token)
 
-	issuesUrl := urls.IssuesUrl()
-	issuesUrl.RawQuery = params.ToRawQuery()
+	apiUrl := urls.IssuesUrl()
+	apiUrl.RawQuery = params.ToRawQuery()
 
-	util.Log(issuesUrl)
-
-	return nil
+	util.Log(apiUrl)
 }
 
 func init() {

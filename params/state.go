@@ -8,36 +8,41 @@ import (
 	"github.com/dmolesUC/gliq/config"
 )
 
-type state uint8
+type State uint8
 
 const (
-	opened state = 1 << iota
-	closed
-	all = opened | closed
+	Opened State = 1 << iota
+	Closed
+	All = Opened | Closed
 )
 
-var stateValues = map[state]string{
-	opened: "opened",
-	closed: "closed",
-	all:    "all",
+var stateValues = map[State]string{
+	Opened: "opened",
+	Closed: "closed",
+	All:    "all",
 }
 
-// State parameter value for issue state (opened/closed/all)
-func State() string {
-	s, err := configuredState()
-	cobra.CheckErr(err)
-
+// StateVal parameter value for issue State (opened/closed/all)
+func StateVal() string {
+	s := StatesToInclude()
 	return stateValues[s]
 }
 
-func configuredState() (state, error) {
-	var s state
+func StatesToInclude() State {
+	s, err := configuredState()
+	cobra.CheckErr(err)
+
+	return s
+}
+
+func configuredState() (State, error) {
+	var s State
 	var err error
 	if config.IncludeOpen {
-		s = s | opened
+		s = s | Opened
 	}
 	if config.IncludeClosed {
-		s = s | closed
+		s = s | Closed
 	}
 	if s == 0 {
 		err = fmt.Errorf("can't return issues that are neither open nor closed")

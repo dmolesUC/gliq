@@ -8,7 +8,7 @@ import (
 
 func ToRawQuery() string {
 	query := url.Values{}
-	query.Set("state", State())
+	query.Set("State", StateVal())
 
 	// with an authenticated user, GitLab by default returns only
 	// issues created by that user
@@ -19,9 +19,9 @@ func ToRawQuery() string {
 	queryString := query.Encode()
 
 	// GitLab wants raw commas, not %2F
-	labels := Labels()
+	labels := LabelsVal()
 	if len(labels) > 0 {
-		queryString = queryString + "&labels=" + Labels()
+		queryString = queryString + "&labels=" + LabelsVal()
 	}
 	return queryString
 }

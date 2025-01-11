@@ -6,6 +6,6 @@ import (
 	"github.com/dmolesUC/gliq/config"
 )
 
-func Labels() string {
+func LabelsVal() string {
 	return strings.Join(config.Labels, ",")
 }
