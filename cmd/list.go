@@ -23,6 +23,8 @@ func execList(cmd *cobra.Command, args []string) {
 	apiUrl := urls.IssuesUrl()
 	apiUrl.RawQuery = params.ToRawQuery()
 
+	// TODO: make the query & parse the response
+
 	util.Log(apiUrl)
 }
 

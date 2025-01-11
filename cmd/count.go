@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/spf13/cobra"
 
+	"github.com/dmolesUC/gliq/config"
 	"github.com/dmolesUC/gliq/params"
 	"github.com/dmolesUC/gliq/urls"
 	"github.com/dmolesUC/gliq/util"
@@ -54,8 +56,7 @@ func execCount(cmd *cobra.Command, args []string) {
 
 	util.Log(apiUrl)
 
-	resp, err := http.Get(apiUrl.String())
-	cobra.CheckErr(err)
+	resp := Get(apiUrl)
 
 	var stats = toStatistics(resp)
 
@@ -76,4 +77,20 @@ func toStatistics(resp *http.Response) Statistics {
 
 func init() {
 	rootCmd.AddCommand(countCmd)
+}
+
+// TODO: Move this to its own file
+func Get(apiUrl *url.URL) *http.Response {
+	req, err := http.NewRequest("get", apiUrl.String(), nil)
+	cobra.CheckErr(err)
+
+	if token := config.Token; len(token) > 0 {
+		req.Header.Add("Authentication", "Authorization: Bearer "+token)
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	cobra.CheckErr(err)
+
+	return resp
 }

@@ -16,6 +16,10 @@ func ToRawQuery() string {
 		query.Set("scope", "all")
 	}
 
+	if milestone := MilestonesVal(); len(milestone) > 0 {
+		query.Set("milestone", milestone)
+	}
+
 	queryString := query.Encode()
 
 	// GitLab wants raw commas, not %2F

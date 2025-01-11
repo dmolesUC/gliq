@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -11,11 +12,12 @@ import (
 )
 
 const (
-	token  = "token"
-	repo   = "repo"
-	open   = "open"
-	closed = "closed"
-	labels = "labels"
+	token     = "token"
+	repo      = "repo"
+	open      = "open"
+	closed    = "closed"
+	labels    = "labels"
+	milestone = "milestone"
 )
 
 // Repo GitLab repo, in the form <user or organization>/<repository name>
@@ -33,13 +35,19 @@ var IncludeClosed bool
 // Labels include only issues with the specified labels
 var Labels []string // TODO: should this be in here? on the root command?
 
+// Milestone include only issues assigned to the specified milestone
+var Milestone string // TODO: should this be in here? on the root command?
+
 func DefineFlags(cmd *cobra.Command) {
 	flags := cmd.PersistentFlags()
 	flags.String(repo, "", "GitLab repo, in the form <user or organization>/<repository name>")
 	flags.String(token, "", "GitLab personal access token")
+
+	// TODO: these things probably shouldn't be configs
 	flags.BoolP(open, "o", true, "Whether to include open issues (--open=false to exclude)")
 	flags.BoolP(closed, "c", false, "Whether to include closed issues")
 	flags.StringSliceP(labels, "l", []string{}, "comma-delimited list of labels to include")
+
 }
 
 func Configure(flags *pflag.FlagSet) {
@@ -47,10 +55,15 @@ func Configure(flags *pflag.FlagSet) {
 	readFlags(flags)
 
 	Repo = ensureRepo()
-	Token = viper.GetString(token)
+	Token = strings.TrimSpace(viper.GetString(token))
+
+	// TODO: these things probably shouldn't be configs
 	IncludeOpen = viper.GetBool(open)
 	IncludeClosed = viper.GetBool(closed)
 	Labels = viper.GetStringSlice(labels)
+	Milestone = strings.TrimSpace(viper.GetString(milestone))
+
+	// TODO: use issue/:iid/links endpoint to filter on related/unrelated
 }
 
 func readConfigFile() {

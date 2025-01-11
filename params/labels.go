@@ -1,6 +1,7 @@
 package params
 
 import (
+	"net/url"
 	"strings"
 
 	"github.com/dmolesUC/gliq/config"
@@ -8,4 +9,9 @@ import (
 
 func LabelsVal() string {
 	return strings.Join(config.Labels, ",")
+}
+
+// TODO: move this to its own file
+func MilestonesVal() string {
+	return url.QueryEscape(config.Milestone)
 }
