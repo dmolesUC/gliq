@@ -20,6 +20,8 @@ const (
 	milestone = "milestone"
 )
 
+// TODO: should these be encapsulated? maybe a Config struct?
+
 // Repo GitLab repo, in the form <user or organization>/<repository name>
 var Repo string
 
@@ -37,6 +39,9 @@ var Labels []string // TODO: should this be in here? on the root command?
 
 // Milestone include only issues assigned to the specified milestone
 var Milestone string // TODO: should this be in here? on the root command?
+
+// ------------------------------------------------------------
+// Exported functions
 
 func DefineFlags(cmd *cobra.Command) {
 	flags := cmd.PersistentFlags()
@@ -66,15 +71,17 @@ func Configure(flags *pflag.FlagSet) {
 	// TODO: use issue/:iid/links endpoint to filter on related/unrelated
 }
 
+// ------------------------------------------------------------
+// Private functions
+
 func readConfigFile() {
 	// Find home directory.
-	home, err := os.UserHomeDir()
-	cobra.CheckErr(err)
+	home := util.Safely(os.UserHomeDir)
 
 	viper.AddConfigPath(home)
 	viper.SetConfigName(".gliq")
 
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 	if err == nil {
 		util.Log("Using configuration file:", viper.ConfigFileUsed())
 	} else {
@@ -84,7 +91,7 @@ func readConfigFile() {
 
 func readFlags(flags *pflag.FlagSet) {
 	err := viper.BindPFlags(flags)
-	cobra.CheckErr(err)
+	util.QuietlyHandle(err)
 }
 
 func ensureRepo() string {

@@ -1,4 +1,4 @@
-package messages
+package apitypes
 
 type Issue struct {
 	Iid         int64

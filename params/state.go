@@ -1,11 +1,8 @@
 package params
 
 import (
-	"fmt"
-
-	"github.com/spf13/cobra"
-
 	"github.com/dmolesUC/gliq/config"
+	"github.com/dmolesUC/gliq/util"
 )
 
 type State uint8
@@ -29,15 +26,7 @@ func StateVal() string {
 }
 
 func StatesToInclude() State {
-	s, err := configuredState()
-	cobra.CheckErr(err)
-
-	return s
-}
-
-func configuredState() (State, error) {
 	var s State
-	var err error
 	if config.IncludeOpen {
 		s = s | Opened
 	}
@@ -45,7 +34,7 @@ func configuredState() (State, error) {
 		s = s | Closed
 	}
 	if s == 0 {
-		err = fmt.Errorf("can't return issues that are neither open nor closed")
+		util.Fail("can't return issues that are neither open nor closed")
 	}
-	return s, err
+	return s
 }

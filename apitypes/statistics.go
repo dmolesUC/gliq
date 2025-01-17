@@ -1,6 +1,9 @@
-package messages
+package apitypes
 
 import "github.com/dmolesUC/gliq/params"
+
+// ------------------------------------------------------------
+// Counts
 
 type Counts struct {
 	All    int64
@@ -21,6 +24,16 @@ func (counts Counts) Included() int64 {
 	return count
 }
 
+// ------------------------------------------------------------
+// Statistics
+
 type Statistics struct {
 	Counts Counts
+}
+
+// ------------------------------------------------------------
+// Statistics response wrapper
+
+type StatisticsResponse struct {
+	Statistics Statistics
 }

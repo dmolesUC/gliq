@@ -5,8 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/dmolesUC/gliq/messages"
-	"github.com/dmolesUC/gliq/params"
+	"github.com/dmolesUC/gliq/apitypes"
 	"github.com/dmolesUC/gliq/urls"
 	"github.com/dmolesUC/gliq/util"
 )
@@ -20,22 +19,14 @@ var countCmd = &cobra.Command{
 	Run: execCount,
 }
 
-func execCount(cmd *cobra.Command, args []string) {
-	apiUrl := urls.IssueStatsUrl()
-	apiUrl.RawQuery = params.ToRawQuery()
+func execCount(*cobra.Command, []string) {
+	apiUrl := urls.IssueStatsUrl().WithParams()
+	var statsResp = urls.ReadAs[apitypes.StatisticsResponse](apiUrl)
 
-	statsMessage := urls.ReadFromUrl[statsMessage](apiUrl)
-	stats := statsMessage.Statistics
-
-	counts := stats.Counts
-	count := counts.Included()
-	fmt.Println(count)
+	counts := statsResp.Statistics.Counts
+	fmt.Println(counts.Included())
 }
 
 func init() {
 	rootCmd.AddCommand(countCmd)
-}
-
-type statsMessage struct {
-	Statistics messages.Statistics
 }
