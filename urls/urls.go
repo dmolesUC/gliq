@@ -3,6 +3,7 @@ package urls
 import (
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/dmolesUC/gliq/options"
@@ -43,6 +44,10 @@ func ReadAs[T any](u *ApiUrl) T {
 var repoUrl *ApiUrl
 
 func doRequest(req *http.Request) *http.Response {
+	if options.DryRun() {
+		os.Exit(0)
+	}
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	util.QuietlyHandle(err)

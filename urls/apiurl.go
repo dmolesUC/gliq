@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/dmolesUC/gliq/options"
 	"github.com/dmolesUC/gliq/util"
@@ -68,7 +69,10 @@ func (u *ApiUrl) JoinPath(elem ...string) *ApiUrl {
 var apiBaseUrl *ApiUrl
 
 func (u *ApiUrl) toRequest() *http.Request {
-	log.Printf("GET %v\n", u.String())
+	verbose := options.Verbose()
+	if verbose {
+		util.Log("GET %v\n", u.String())
+	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	util.QuietlyHandle(err)
 	return req
@@ -77,7 +81,10 @@ func (u *ApiUrl) toRequest() *http.Request {
 func (u *ApiUrl) get() *http.Response {
 	req := u.toRequest()
 	if token := options.AccessToken(); len(token) > 0 {
-		// log.Printf("Adding auth token %v\n", token)
+		verbose := options.Verbose()
+		if verbose {
+			util.Logf("Using auth token %v\n", strings.Repeat("*", len(token)))
+		}
 		req.Header.Add("Authorization", "Bearer "+token)
 	}
 	return doRequest(req)

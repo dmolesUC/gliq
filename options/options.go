@@ -35,6 +35,14 @@ func StateFlags() State {
 	return states
 }
 
+func Verbose() bool {
+	return verboseOutput
+}
+
+func DryRun() bool {
+	return dryRun
+}
+
 func InitOptions(cmd *cobra.Command) {
 	defineFlags(cmd)
 	cobra.OnInitialize(func() {
@@ -54,6 +62,8 @@ const (
 	milestone = "milestone"
 	related   = "include-related"
 	unrelated = "exclude-related"
+	verbose   = "verbose"
+	dry       = "dry-run"
 )
 
 var repository string
@@ -63,6 +73,8 @@ var includeLabels []string
 var includeMilestone string
 var includeRelated []string
 var excludeRelated []string
+var verboseOutput bool
+var dryRun bool
 
 func defineFlags(cmd *cobra.Command) {
 	flags := cmd.PersistentFlags()
@@ -78,6 +90,9 @@ func defineFlags(cmd *cobra.Command) {
 	flags.StringSliceP(labels, "l", []string{}, "comma-delimited list of labels to include")
 
 	flags.StringP(milestone, "m", "", "include only issues assigned to the specified milestone")
+
+	flags.BoolP(verbose, "v", false, "verbose output")
+	flags.BoolP(dry, "n", false, "dry run: validate parameters but do not make an API request")
 
 	flags.String(token, "", "GitLab personal access token")
 }
@@ -97,6 +112,9 @@ func configure(flags *pflag.FlagSet) {
 
 	includeLabels = viper.GetStringSlice(labels)
 	includeMilestone = strings.TrimSpace(viper.GetString(milestone))
+
+	verboseOutput = viper.GetBool(verbose)
+	dryRun = viper.GetBool(dry)
 
 	// TODO: use issue/:iid/links endpoint to filter on related/unrelated
 }
