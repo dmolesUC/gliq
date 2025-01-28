@@ -8,25 +8,18 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/dmolesUC/gliq/config"
-	"github.com/dmolesUC/gliq/params"
+	"github.com/dmolesUC/gliq/options"
 	"github.com/dmolesUC/gliq/util"
 )
 
 // ------------------------------------------------------------
-// Constants
+// Exported
 
 const ApiBaseUrlStr = "https://gitlab.com/api/v4"
-
-// ------------------------------------------------------------
-// ApiUrl
 
 type ApiUrl struct {
 	url.URL
 }
-
-// ------------------------------
-// Public methods
 
 func (u *ApiUrl) Clone() *ApiUrl {
 	u2 := *u
@@ -56,7 +49,7 @@ func (u *ApiUrl) ReadInto(v any) {
 
 func (u *ApiUrl) WithParams() *ApiUrl {
 	u2 := u.Clone()
-	u2.RawQuery = params.ToRawQuery()
+	u2.RawQuery = queryFromOptions()
 	return u2
 }
 
@@ -66,8 +59,13 @@ func (u *ApiUrl) JoinPath(elem ...string) *ApiUrl {
 	return u2
 }
 
-// ------------------------------
-// Private methods
+// ------------------------------------------------------------
+// Exported functions
+
+// ------------------------------------------------------------
+// Package-local
+
+var apiBaseUrl *ApiUrl
 
 func (u *ApiUrl) toRequest() *http.Request {
 	log.Printf("GET %v\n", u.String())
@@ -78,36 +76,12 @@ func (u *ApiUrl) toRequest() *http.Request {
 
 func (u *ApiUrl) get() *http.Response {
 	req := u.toRequest()
-	if token := config.Token; len(token) > 0 {
+	if token := options.AccessToken(); len(token) > 0 {
 		// log.Printf("Adding auth token %v\n", token)
 		req.Header.Add("Authorization", "Bearer "+token)
 	}
 	return doRequest(req)
 }
-
-// ------------------------------------------------------------
-// Exported functions
-
-func ReadAs[T any](u *ApiUrl) T {
-	var v T
-	u.ReadInto(&v)
-	return v
-}
-
-// ------------------------------------------------------------
-// Private functions
-
-func doRequest(req *http.Request) *http.Response {
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	util.QuietlyHandle(err)
-	return resp
-}
-
-// ------------------------------------------------------------
-// Private state
-
-var apiBaseUrl *ApiUrl
 
 // ------------------------------------------------------------
 // Initializer

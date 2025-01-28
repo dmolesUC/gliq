@@ -1,6 +1,6 @@
 package apitypes
 
-import "github.com/dmolesUC/gliq/params"
+import "github.com/dmolesUC/gliq/options"
 
 // ------------------------------------------------------------
 // Counts
@@ -13,12 +13,12 @@ type Counts struct {
 
 func (counts Counts) Included() int64 {
 	var count int64
-	switch params.StatesToInclude() {
-	case params.Closed:
+	switch options.StateFlags() {
+	case options.Closed:
 		count = counts.Closed
-	case params.Opened:
+	case options.Opened:
 		count = counts.Opened
-	case params.All:
+	case options.All:
 		count = counts.All
 	}
 	return count

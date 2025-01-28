@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/dmolesUC/gliq/config"
+	"github.com/dmolesUC/gliq/options"
 	"github.com/dmolesUC/gliq/util"
 )
 
@@ -26,11 +26,8 @@ func Execute() {
 }
 
 func init() {
-	config.DefineFlags(rootCmd)
-	cobra.OnInitialize(initConfig)
-}
+	rootCmd.Flags().SortFlags = false
+	rootCmd.PersistentFlags().SortFlags = false
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	config.Configure(rootCmd.PersistentFlags())
+	options.InitOptions(rootCmd)
 }
