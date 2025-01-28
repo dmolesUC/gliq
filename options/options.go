@@ -2,6 +2,7 @@ package options
 
 import (
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -46,11 +47,13 @@ func InitOptions(cmd *cobra.Command) {
 
 const (
 	token     = "token"
-	repo      = "repository"
+	repo      = "repo"
 	open      = "open"
 	closed    = "closed"
 	labels    = "labels"
 	milestone = "milestone"
+	related   = "include-related"
+	unrelated = "exclude-related"
 )
 
 var repository string
@@ -58,19 +61,22 @@ var accessToken string
 var states State
 var includeLabels []string
 var includeMilestone string
+var includeRelated []string
+var excludeRelated []string
 
 func defineFlags(cmd *cobra.Command) {
 	flags := cmd.PersistentFlags()
 
-	flags.StringP(repo, "r", "", "GitLab repo, in the form <user or organization>/<repository name>")
+	flags.String(repo, "", "GitLab repository, in the form <user or organization>/<repository name>")
 
-	flags.BoolP(open, "o", true, "Whether to include open issues (--open=false to exclude)")
-	flags.BoolP(closed, "c", false, "Whether to include closed issues")
+	flags.BoolP(open, "o", true, "whether to include open issues (--open=false to exclude)")
+	flags.BoolP(closed, "c", false, "whether to include closed issues")
 
-	// TODO: should this be on the root command?
+	flags.StringSliceP(related, "r", []string{}, "include only if related to any of these issues (comma-delimited list)")
+	flags.StringSliceP(unrelated, "x", []string{}, "exclude if related to any of these issues (comma-delimited list)")
+
 	flags.StringSliceP(labels, "l", []string{}, "comma-delimited list of labels to include")
 
-	// TODO: should this be on the root command?
 	flags.StringP(milestone, "m", "", "include only issues assigned to the specified milestone")
 
 	flags.String(token, "", "GitLab personal access token")
@@ -86,6 +92,8 @@ func configure(flags *pflag.FlagSet) {
 	var includeOpen = viper.GetBool(open)
 	var includeClosed = viper.GetBool(closed)
 	states = toState(includeOpen, includeClosed)
+
+	includeRelated, excludeRelated = relatedIssues()
 
 	includeLabels = viper.GetStringSlice(labels)
 	includeMilestone = strings.TrimSpace(viper.GetString(milestone))
@@ -119,4 +127,19 @@ func ensureRepo() string {
 		util.Fail("no repository specified")
 	}
 	return r
+}
+
+func relatedIssues() (incl []string, excl []string) {
+	incl = viper.GetStringSlice(related)
+	slices.Sort(incl)
+
+	excl = viper.GetStringSlice(unrelated)
+	slices.Sort(excl)
+
+	overlap := util.Intersect(incl, excl)
+	if len(overlap) > 0 {
+		util.Fail("can't return issues that both are and are not related to " + strings.Join(overlap, ","))
+	}
+
+	return incl, excl
 }
