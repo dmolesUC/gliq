@@ -9,5 +9,5 @@ func Log(a ...any) {
 }
 
 func Logf(fmt string, a ...any) {
-	log.Printf(fmt, a)
+	log.Printf(fmt, a...)
 }

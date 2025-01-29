@@ -10,7 +10,7 @@ func Map[T any, U any](s []T, f func(T) U) []U {
 	return s1
 }
 
-func Filter[S ~[]E, E any](s S, f func(E) bool) S {
+func Select[S ~[]E, E any](s S, f func(E) bool) S {
 	s2 := S(nil)
 	for _, v := range s {
 		if f(v) {
@@ -20,8 +20,14 @@ func Filter[S ~[]E, E any](s S, f func(E) bool) S {
 	return s2
 }
 
+func Reject[S ~[]E, E any](s S, f func(E) bool) S {
+	return Select(s, func(e E) bool {
+		return !f(e)
+	})
+}
+
 func Intersect[S1 ~[]E, S2 ~[]E, E comparable](s1 S1, s2 S2) S1 {
-	return Filter(s1, func(e E) bool {
+	return Select(s1, func(e E) bool {
 		return slices.Contains(s2, e)
 	})
 }

@@ -3,6 +3,7 @@ package options
 import (
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -43,6 +44,14 @@ func DryRun() bool {
 	return dryRun
 }
 
+func RelatedIdsToInclude() []int {
+	return includeRelated
+}
+
+func RelatedIdsToExclude() []int {
+	return excludeRelated
+}
+
 func InitOptions(cmd *cobra.Command) {
 	defineFlags(cmd)
 	cobra.OnInitialize(func() {
@@ -71,8 +80,8 @@ var accessToken string
 var states State
 var includeLabels []string
 var includeMilestone string
-var includeRelated []string
-var excludeRelated []string
+var includeRelated []int
+var excludeRelated []int
 var verboseOutput bool
 var dryRun bool
 
@@ -84,8 +93,8 @@ func defineFlags(cmd *cobra.Command) {
 	flags.BoolP(open, "o", true, "whether to include open issues (--open=false to exclude)")
 	flags.BoolP(closed, "c", false, "whether to include closed issues")
 
-	flags.StringSliceP(related, "r", []string{}, "include only if related to any of these issues (comma-delimited list)")
-	flags.StringSliceP(unrelated, "x", []string{}, "exclude if related to any of these issues (comma-delimited list)")
+	flags.IntSliceP(related, "r", []int{}, "include only if related to any of these issues (comma-delimited list)")
+	flags.IntSliceP(unrelated, "x", []int{}, "exclude if related to any of these issues (comma-delimited list)")
 
 	flags.StringSliceP(labels, "l", []string{}, "comma-delimited list of labels to include")
 
@@ -126,6 +135,7 @@ func readConfigFile() {
 	viper.AddConfigPath(home)
 	viper.SetConfigName(".gliq")
 
+	// TODO: delay logging till after we read the verbose flag
 	err := viper.ReadInConfig()
 	if err == nil {
 		util.Log("Using configuration file:", viper.ConfigFileUsed())
@@ -147,16 +157,17 @@ func ensureRepo() string {
 	return r
 }
 
-func relatedIssues() (incl []string, excl []string) {
-	incl = viper.GetStringSlice(related)
+func relatedIssues() (incl []int, excl []int) {
+	incl = viper.GetIntSlice(related)
 	slices.Sort(incl)
 
-	excl = viper.GetStringSlice(unrelated)
+	excl = viper.GetIntSlice(unrelated)
 	slices.Sort(excl)
 
 	overlap := util.Intersect(incl, excl)
 	if len(overlap) > 0 {
-		util.Fail("can't return issues that both are and are not related to " + strings.Join(overlap, ","))
+		overlapStr := util.Map(overlap, strconv.Itoa)
+		util.Fail("can't return issues that both are and are not related to " + strings.Join(overlapStr, ","))
 	}
 
 	return incl, excl

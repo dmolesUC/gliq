@@ -71,7 +71,7 @@ var apiBaseUrl *ApiUrl
 func (u *ApiUrl) toRequest() *http.Request {
 	verbose := options.Verbose()
 	if verbose {
-		util.Log("GET %v\n", u.String())
+		util.Logf("GET %v\n", u.String())
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	util.QuietlyHandle(err)
@@ -95,5 +95,5 @@ func (u *ApiUrl) get() *http.Response {
 
 func init() {
 	u, _ := url.Parse(ApiBaseUrlStr)
-	apiBaseUrl = &ApiUrl{*u}
+	apiBaseUrl = &ApiUrl{URL: *u}
 }
